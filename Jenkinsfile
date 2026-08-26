@@ -1,7 +1,7 @@
 pipeline {
     agent any
-    env {
-        DOCKER_IMG=sathish1102/springapp:v1
+    environment {
+        DOCKER_IMG="sathish1102/springapp:v1"
     }
 
     stages {

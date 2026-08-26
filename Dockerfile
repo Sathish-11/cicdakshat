@@ -1,4 +1,4 @@
-FROM openjdk-21-jdk-alpine AS builder
+FROM eclipse-temurin:21-jre-alpine AS builder
 WORKDIR /app
 COPY mvnw .
 COPY .mvn .mvn/
