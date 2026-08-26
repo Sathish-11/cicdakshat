@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_IMG="sathish1102/springapp:v1"
+        DOCKER_IMG="sathishrameshkiaq/springapp:v1"
     }
 
     stages {
@@ -39,7 +39,7 @@ pipeline {
         stage ('Deploy to k8s') {
             steps {
               script {
-                kubernetesDeploy configs: '', kubeConfig: [path: ''], kubeconfigId: 'k8sconfigpwd', secretName: '', ssh: [sshCredentialsId: '*', sshServer: ''], textCredentials: [certificateAuthorityData: '', clientCertificateData: '', clientKeyData: '', serverUrl: 'https://']
+                kubernetesDeploy (configs: 'deploymentservice.yaml', kubeconfigId: 'k8sconfigpwd')
                 sh "kubectl get all -n dev"
               }
             }
