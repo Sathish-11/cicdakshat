@@ -1,43 +1,50 @@
 pipeline {
     agent any
+    env {
+        DOCKER_IMG=sathish1102/springapp:v1
+    }
+
     stages {
-        stage('Build Maven') {
-            steps {
-                git url: 'https://github.com/Sathish-11/cicdakshat.git', branch: "master"
+        stage ('Git Checkout') {
+            steps{
+              script {
+                git branch: 'master', 'https://github.com/Sathish-11/cicdakshat.git'
+              }
+            }
+        }
+        stage ('Maven Clean & Install Package') {
+            steps{
+              script {
                 sh 'mvn clean install'
+              }
             }
         }
-        stage('Debug Branch') {
+        stage ('Build Stage') {
             steps {
-                script {
-                    echo "DEBUG: env.GIT_BRANCH = ${env.GIT_BRANCH}"
-                    sh 'git branch'
-                    sh 'git rev-parse --abbrev-ref HEAD'
-                }
+              script {
+                sh 'docker build -t ${DOCKER-IMG} .'
+              }
             }
         }
-        stage('Build Docker image') {
-            steps {
-                script {
-                    sh 'docker build -t sathish1102/april302025project:v1 .'
-                }
+        stage ('Docker Login and Push into repo') {
+            steps{
+              withCredentials([usernamePassword(credentialsId: 'dockerhub-pwd', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                sh "docker push $DOCKER_IMG"
+              }
             }
         }
-        stage('Docker login & Push') {
+        stage ('Deploy to k8s') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-login', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
-                    sh 'docker push sathish1102/april302025project:v1'
-                }
-            }
-        }
-        stage('Deploy to k8s') {
-            when { expression { env.GIT_BRANCH == 'master' } }
-            steps {
-                script {
-                    kubernetesDeploy(configs: 'deploymentservice.yaml', kubeconfigId: 'k8sconfigpwd')
-                }
+                sh "kubectl apply -f deploymentservice.yaml"
+                sh "kubectl get all"
             }
         }
     }
+    post {
+        success {
+            archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
+        }
+    }
 }
+
