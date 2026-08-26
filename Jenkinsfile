@@ -8,7 +8,7 @@ pipeline {
         stage ('Git Checkout') {
             steps{
               script {
-                git branch: 'master', 'https://github.com/Sathish-11/cicdakshat.git'
+                git branch: 'feature-1', 'https://github.com/Sathish-11/cicdakshat.git'
               }
             }
         }
