@@ -36,8 +36,10 @@ pipeline {
         }
         stage ('Deploy to k8s') {
             steps {
-                sh "kubectl apply -f deploymentservice.yaml"
-                sh "kubectl get all"
+              script {
+                kubernetesDeploy configs: '', kubeConfig: [path: ''], kubeconfigId: 'k8sconfigpwd', secretName: '', ssh: [sshCredentialsId: '*', sshServer: ''], textCredentials: [certificateAuthorityData: '', clientCertificateData: '', clientKeyData: '', serverUrl: 'https://']
+                sh "kubectl get all -n dev"
+              }
             }
         }
     }
